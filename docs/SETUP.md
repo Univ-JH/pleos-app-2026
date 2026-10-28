@@ -194,9 +194,13 @@ adb forward tcp:8088 tcp:8088
 
 `main` push, PR, 수동 실행 시 GitHub Actions가 다음을 수행합니다.
 
-1. `ubuntu-latest`, `windows-latest`, `macos-latest`에서 각각 JDK 17과 Android SDK 준비
-2. Windows는 PowerShell의 `gradlew.bat`, macOS·Linux는 `gradlew`로 `:app:assembleDebug`, `:app:lintDebug` 실행
-3. OS별 Debug APK와 Lint 보고서를 서로 다른 Actions artifact로 7일 동안 보관
+1. Linux(`ubuntu-latest`)에서 JDK 17과 Android SDK 준비
+2. `./gradlew :app:assembleDebug :app:lintDebug` 실행
+3. Debug APK와 Lint 보고서를 Actions artifact로 7일 동안 보관
+
+CI는 공통 Android 빌드를 검증하는 Linux 단일 작업입니다.
+Windows·macOS·Linux 로컬 개발자는 위의 OS별 안내에 따라 같은 프로젝트를 빌드합니다.
+`main`에 병합하려면 PR과 Linux CI의 `Build and lint` 통과가 필요합니다.
 
 CI에는 에뮬레이터 기반 UI·차량 서비스 테스트가 아직 포함되어 있지 않습니다.
 기능 구현 후 의미 있는 단위·연동 테스트를 추가합니다.
