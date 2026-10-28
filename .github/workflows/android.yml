@@ -15,9 +15,13 @@ concurrency:
 
 jobs:
   build:
-    name: Build and lint
-    runs-on: ubuntu-latest
+    name: Build and lint (${{ matrix.os }})
+    runs-on: ${{ matrix.os }}
     timeout-minutes: 20
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ubuntu-latest, windows-latest, macos-latest]
     steps:
       - name: Check out repository
         uses: actions/checkout@v7.0.1
@@ -33,16 +37,34 @@ jobs:
       - name: Set up Gradle
         uses: gradle/actions/setup-gradle@v6.4.1
 
-      - name: Install Android SDK packages
-        run: sdkmanager "platforms;android-35" "build-tools;35.0.0"
+      - name: Set up Android SDK
+        uses: android-actions/setup-android@v4.0.4
+        with:
+          packages: platform-tools platforms;android-35 build-tools;35.0.0
+          log-accepted-android-sdk-licenses: false
 
-      - name: Build debug APK and run Android Lint
+      - name: Build debug APK and run Android Lint (macOS / Linux)
+        if: runner.os != 'Windows'
         run: ./gradlew --no-daemon :app:assembleDebug :app:lintDebug
+
+      - name: Build debug APK and run Android Lint (Windows)
+        if: runner.os == 'Windows'
+        shell: pwsh
+        run: .\gradlew.bat --no-daemon :app:assembleDebug :app:lintDebug
 
       - name: Upload debug APK
         uses: actions/upload-artifact@v7.0.2
         with:
-          name: pleos-app-2026-debug
+          name: pleos-app-2026-debug-${{ matrix.os }}
           path: app/build/outputs/apk/debug/app-debug.apk
           if-no-files-found: error
+          retention-days: 7
+
+      - name: Upload Lint reports
+        if: always()
+        uses: actions/upload-artifact@v7.0.2
+        with:
+          name: lint-reports-${{ matrix.os }}
+          path: app/build/reports/lint-results-debug.*
+          if-no-files-found: ignore
           retention-days: 7

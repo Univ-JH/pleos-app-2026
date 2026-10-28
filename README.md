@@ -9,6 +9,7 @@ Pleos Connect app for the 2026 Hyundai Motor Group App Development Challenge.
 
 | 항목 | 설정 |
 | --- | --- |
+| 개발 OS | Windows / Linux / macOS |
 | 언어 / UI | Kotlin 2.0.21 / Jetpack Compose · Material 3 |
 | JDK | 17 |
 | Gradle / Android Gradle Plugin | 8.10.2 / 8.8.2 |
@@ -26,20 +27,28 @@ Pleos Connect app for the 2026 Hyundai Motor Group App Development Challenge.
 3. SDK 경로를 자동으로 찾지 못하면 로컬 `local.properties`에 `sdk.dir`을 지정합니다.
 4. 아래 명령으로 빌드와 정적 검사를 실행합니다.
 
+macOS / Linux:
+
 ```bash
 ./gradlew :app:assembleDebug :app:lintDebug
 ```
 
+Windows PowerShell:
+
+```powershell
+.\gradlew.bat :app:assembleDebug :app:lintDebug
+```
+
 - Debug APK: `app/build/outputs/apk/debug/app-debug.apk`
 - Lint 보고서: `app/build/reports/lint-results-debug.html`
-- 앱 실행: Pleos Connect AVD를 시작한 뒤 Android Studio의 Run 또는 `./gradlew :app:installDebug`
-- 에뮬레이터 설치와 macOS 환경 변수: [개발 환경 안내](docs/SETUP.md)
+- 앱 실행: Pleos Connect AVD를 시작한 뒤 Android Studio의 Run 사용
+- OS별 환경 변수·설치 명령·에뮬레이터 설정: [개발 환경 안내](docs/SETUP.md)
 
 ## 현재 범위
 
 - [x] 주제에 종속되지 않는 Compose 시작 화면과 라이트·다크 테마
 - [x] Gradle Wrapper, 버전 카탈로그, Pleos Maven 저장소 및 SDK 의존성
-- [x] GitHub Actions의 Debug APK 빌드·Lint 검사 설정
+- [x] Windows·Linux·macOS별 GitHub Actions Debug APK 빌드·Lint 검사 설정
 - [ ] 앱 주제 및 핵심 사용자 시나리오 결정
 - [ ] Vehicle 데이터 조회와 NaviHelper 연동 구현·실기동 검증
 - [ ] 주행 규제 대응, 핵심 기능 테스트, 제출용 서명 APK 준비
@@ -59,10 +68,20 @@ docs/SETUP.md           개발 환경·에뮬레이터·SDK 연동 안내
 ## 협업
 
 - `main`에서 `feat/설명`, `chore/설명`, `fix/설명` 브랜치를 만들어 작업합니다.
-- PR 전에 `./gradlew :app:assembleDebug :app:lintDebug`를 실행합니다.
+- PR 전에 위의 OS별 명령으로 `:app:assembleDebug :app:lintDebug`를 실행합니다.
 - `local.properties`, API 키, 서명 키와 비밀번호는 커밋하지 않습니다.
 - SDK 추가·업데이트 시 버전 카탈로그와 개발 환경 문서를 함께 수정합니다.
 - 제출용 APK는 기능 구현 후 서명 설정과 제출 절차를 정해 준비합니다. CI의 Debug APK는 개발 확인용입니다.
+
+## GitHub Actions
+
+[Android workflow](https://github.com/Univ-JH/pleos-app-2026/actions/workflows/android.yml)는
+`main` push, PR, 수동 실행 시 Windows·Linux·macOS에서 각각 빌드와 Lint를 수행합니다.
+Windows는 `gradlew.bat`를 PowerShell에서 실행하고, macOS·Linux는 `gradlew`를 사용합니다.
+각 OS의 Debug APK와 Lint 보고서는 실행 결과의 Artifacts에서 7일간 다운로드할 수 있습니다.
+
+워크플로 파일과 GitHub 저장소의 브랜치 보호·보안·병합 설정은 별도 항목입니다.
+저장소 관리 설정은 GitHub Settings에서 관리합니다.
 
 ## 공식 자료
 
