@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="utf-8"?>
+<manifest xmlns:android="http://schemas.android.com/apk/res/android">
+  <uses-permission android:name="pleos.car.permission.CAR_DOORS" />
+
+  <application>
+    <activity
+      android:name=".VehicleSmokeActivity"
+      android:exported="true"
+      android:label="Vehicle SDK 확인" />
+  </application>
+</manifest>

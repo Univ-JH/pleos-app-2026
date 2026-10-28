@@ -3,7 +3,7 @@
 Pleos Connect app for the 2026 Hyundai Motor Group App Development Challenge.
 
 현대자동차그룹 차량용 앱 개발 공모전을 위한 Android 프로젝트입니다.
-주제는 검토 중이며, 현재는 기본 화면과 Pleos SDK 의존성을 준비한 단계입니다.
+주제는 검토 중이며, 기본 화면 실행과 Pleos Vehicle 데이터 조회를 전용 에뮬레이터에서 검증했습니다.
 
 ## 개발 환경
 
@@ -49,12 +49,15 @@ Windows PowerShell:
 - [x] 주제에 종속되지 않는 Compose 시작 화면과 라이트·다크 테마
 - [x] Gradle Wrapper, 버전 카탈로그, Pleos Maven 저장소 및 SDK 의존성
 - [x] Linux GitHub Actions Debug APK 빌드·Lint 검사 설정
+- [x] Pleos 2.1.0에서 기본 앱 실행 및 앞줄 왼쪽 문 상태 조회 검증
 - [ ] 앱 주제 및 핵심 사용자 시나리오 결정
-- [ ] Vehicle 데이터 조회와 NaviHelper 연동 구현·실기동 검증
+- [ ] 주제에 맞는 Vehicle 기능 및 NaviHelper 연동 구현·검증
 - [ ] 주행 규제 대응, 핵심 기능 테스트, 제출용 서명 APK 준비
 
-SDK 의존성을 추가한 상태이며, 차량 서비스 연결이나 API 호출 성공을 의미하지 않습니다.
-차량 권한은 구현할 기능이 정해지면 필요한 항목만 추가합니다.
+디버그 전용 조회 화면에서 문 상태 `0 → 1 → 0` 수신을 확인했습니다.
+검증 절차와 범위는 [Vehicle SDK 검증 기록](docs/VEHICLE_SMOKE_TEST.md)을 참조하세요.
+조회 화면과 `CAR_DOORS` 권한은 release 빌드에 포함되지 않습니다.
+NaviHelper는 의존성만 추가한 상태이며, 실차 동작은 아직 검증하지 않았습니다.
 
 ## 프로젝트 구조
 

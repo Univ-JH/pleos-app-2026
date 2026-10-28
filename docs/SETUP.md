@@ -158,6 +158,33 @@ adb shell am start -n io.github.univjh.pleosapp/.MainActivity
 
 설치 주소와 상세 절차는 [공식 에뮬레이터 가이드](https://document.pleos.ai/docs/connect/guide/getting-started/application-development/setup-connect-sdk-emulator)를 따릅니다.
 
+### 설치가 끝난 뒤 다시 실행하기
+
+Android Studio에서는 다음 순서로 실행합니다.
+
+1. 저장소 루트를 열고 Gradle Sync가 완료될 때까지 기다립니다. Gradle JDK는 **17**을 사용합니다.
+2. **Tools → Device Manager**에서 생성한 Pleos AVD의 실행 버튼을 누릅니다.
+3. Pleos 홈 화면이 나타나면 상단 실행 구성을 **app**, 대상 기기를 해당 Pleos AVD로 선택합니다.
+4. **Run ▶**을 누르면 debug APK가 설치되고 기본 화면이 열립니다.
+5. 차량 조회 화면은 아래 5절의 ADB 명령으로 별도로 실행합니다.
+
+터미널만 사용한다면 2절의 OS별 환경 변수를 먼저 설정하고, 첫 번째 터미널에서 실행합니다.
+
+```bash
+emulator -list-avds
+```
+
+목록의 AVD 이름으로 에뮬레이터를 시작합니다. 아래는 이번 검증에서 생성한 이름이며,
+다른 PC에서는 그 PC에 생성한 Pleos AVD 이름으로 바꿉니다. 명령은 모든 OS에서 같습니다.
+
+```bash
+emulator -avd Pleos_Connect_2_1 -no-snapshot
+```
+
+이 터미널은 에뮬레이터 실행 중 유지합니다. 두 번째 터미널에서도 환경 변수를 설정하고
+저장소 루트로 이동한 뒤 3절의 `installDebug`와 `adb shell am start` 명령을 실행합니다.
+Windows PowerShell의 Gradle 명령은 `.\gradlew.bat`, macOS·Linux는 `./gradlew`입니다.
+
 Virtual Console로 차량 상태를 변경하려면 AVD 실행 후 다음 명령을 사용합니다.
 
 ```bash
@@ -169,11 +196,12 @@ adb forward tcp:8088 tcp:8088
 
 ## 5. SDK 연동을 시작할 때
 
-현재 `app`에는 아래 SDK 의존성만 추가되어 있습니다.
+현재 `app`에는 아래 SDK 의존성이 추가되어 있습니다.
+Vehicle은 디버그 전용 화면에서 문 상태 조회를 검증했습니다.
 
 | 의존성 | 버전 | 다음 구현 |
 | --- | --- | --- |
-| `ai.pleos.playground:Vehicle` | 2.3.2 | 필요한 도메인 선정, 권한 선언, 초기화·지원 범위 확인·조회·해제 |
+| `ai.pleos.playground:Vehicle` | 2.3.2 | 문 상태 조회 검증 완료; 주제에 맞는 도메인 선정 및 앱 기능 구현 |
 | `ai.pleos.playground:NaviHelper` | 3.0.5 | 필요한 API 선정, 권한 선언, 연결 콜백·이벤트·해제 |
 
 - 실제 기능에서 사용하는 최소 권한만 Manifest에 추가합니다.
@@ -182,6 +210,18 @@ adb forward tcp:8088 tcp:8088
 - 등록한 Listener를 해제하고 사용 종료 시 SDK 리소스를 정리합니다.
 - 주행 중 기능 제한은 [주행 안전 가이드](https://document.pleos.ai/docs/pleos-only/vehicle-app-planning-guide/driver-distraction-guideline)를 기준으로 구현합니다.
 - 위치·음성·차량 제어 등 추가 기능은 [프로젝트별 사용 가능 상태](https://document.pleos.ai/docs/pleos-only/create-my-project)를 확인한 후 연결합니다.
+
+디버그 APK 설치 후 아래 명령으로 조회 화면을 엽니다. 이 명령은 모든 OS에서 같습니다.
+여러 기기가 연결되어 있으면 `adb -s <serial>`로 Pleos AVD를 지정합니다.
+
+```bash
+adb shell am start -W --activity-clear-top -n io.github.univjh.pleosapp/.VehicleSmokeActivity
+```
+
+Virtual Console에서 `FL door`를 바꾼 뒤 앱의 **다시 읽기**로 현재 값을 요청합니다.
+자동 구독은 사용하지 않습니다. 지원 범위 확인, null·오류·시간 초과 표시, 화면 종료 시
+리소스 해제를 포함합니다. 자세한 재현 방법과 실측 결과는
+[Vehicle SDK 검증 기록](VEHICLE_SMOKE_TEST.md)을 참조하세요.
 
 참고:
 
