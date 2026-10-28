@@ -5,6 +5,7 @@
 .externalNativeBuild/
 .cxx/
 captures/
+__pycache__/
 
 # Machine-specific configuration
 local.properties
