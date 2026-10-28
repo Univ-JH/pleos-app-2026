@@ -97,19 +97,19 @@ Windows에서도 Java properties의 역슬래시 이스케이프를 피하도록
 macOS / Linux:
 
 ```bash
-./gradlew :app:assembleDebug :app:lintDebug
+./gradlew :app:assembleDebug :app:lintDebug :app:testDebugUnitTest
 ```
 
 Windows PowerShell:
 
 ```powershell
-.\gradlew.bat :app:assembleDebug :app:lintDebug
+.\gradlew.bat :app:assembleDebug :app:lintDebug :app:testDebugUnitTest
 ```
 
 Windows 명령 프롬프트(CMD):
 
 ```bat
-gradlew.bat :app:assembleDebug :app:lintDebug
+gradlew.bat :app:assembleDebug :app:lintDebug :app:testDebugUnitTest
 ```
 
 | 결과물 | 위치 |
@@ -194,13 +194,33 @@ adb forward tcp:8088 tcp:8088
 
 `main` push, PR, 수동 실행 시 GitHub Actions가 다음을 수행합니다.
 
-1. Linux(`ubuntu-latest`)에서 JDK 17과 Android SDK 준비
-2. `./gradlew :app:assembleDebug :app:lintDebug` 실행
-3. Debug APK와 Lint 보고서를 Actions artifact로 7일 동안 보관
+1. 변경 감지 코드의 회귀 검사를 실행하고 문서만 바뀌었는지 확인
+2. Android 검사가 필요하면 Linux(`ubuntu-24.04`)에서 JDK 17과 Android SDK 준비
+3. `./gradlew --no-daemon --continue --build-cache :app:assembleDebug :app:lintDebug :app:testDebugUnitTest` 실행
+4. Debug APK와 Lint·단위 테스트 보고서를 Actions artifact로 7일 동안 보관
 
 CI는 공통 Android 빌드를 검증하는 Linux 단일 작업입니다.
 Windows·macOS·Linux 로컬 개발자는 위의 OS별 안내에 따라 같은 프로젝트를 빌드합니다.
 `main`에 병합하려면 PR과 Linux CI의 `Build and lint` 통과가 필요합니다.
 
-CI에는 에뮬레이터 기반 UI·차량 서비스 테스트가 아직 포함되어 있지 않습니다.
-기능 구현 후 의미 있는 단위·연동 테스트를 추가합니다.
+### 캐시와 변경 감지 정책
+
+- `org.gradle.caching=true`로 입력이 같은 Gradle 작업의 결과를 재사용합니다. 소스·의존성·설정이 바뀌면 Gradle이 해당 작업을 다시 실행합니다.
+- `setup-gradle`이 의존성과 빌드 결과 캐시를 복원합니다. PR은 읽기 전용이고, `main` 및 권한 있는 사용자의 수동 실행은 캐시를 저장할 수 있습니다.
+- PR은 기준 브랜치와 테스트할 merge 커밋을 비교하고, push는 이전 커밋부터 전체 변경을 비교합니다. 전체 Git 이력 대신 필요한 기준 커밋만 가져옵니다.
+- 생략 가능한 파일은 루트 `README.md`, `docs/` 아래 `.md`, `docs/images/` 아래 `.png`·`.jpg`·`.jpeg`·`.webp`·`.gif`·`.svg`뿐입니다. 그 외 파일은 전체 검사 대상입니다.
+- 파일 삭제·이름 변경도 검사하며, 비교 실패·빈 diff·수동 실행은 전체 검사를 실행합니다. 문서 전용 PR에서도 필수 검사 `Build and lint`는 성공 결과를 남깁니다.
+- 같은 브랜치/PR에서 새 실행이 시작되면 이전 실행을 취소합니다. 취소된 실행은 보고서 업로드를 생략하고, 빌드·Lint·단위 테스트 실패 시 생성된 보고서는 보관합니다.
+- Runner의 OS 계열과 사용하는 Action의 커밋을 고정했습니다. 버전을 갱신할 때는 버전 주석과 커밋 SHA를 함께 갱신하고 CI로 확인합니다. Runner 내 설치 도구까지 완전히 고정되는 것은 아닙니다.
+
+캐시가 의심될 때는 **Actions → Android → Run workflow → disable_cache**를 켭니다.
+이 경우 의존성 캐시 복원·저장과 Gradle 빌드 결과 재사용을 모두 끄고 전체 검사를 수행합니다.
+로컬에서는 `./gradlew --no-build-cache :app:assembleDebug :app:lintDebug :app:testDebugUnitTest`
+(Windows는 `.\gradlew.bat`)로 빌드 결과 캐시 사용을 끌 수 있습니다. 이미 있는 로컬 출력도
+다시 생성하려면 `--rerun-tasks`를 추가합니다.
+
+CI 변경 감지 회귀 검사는 `python3 -B -m unittest discover -s .github/scripts -p 'test_*.py'`로 실행합니다.
+Windows에서는 `python3` 대신 설치된 `python` 또는 `py` 명령을 사용합니다.
+
+아직 앱 단위 테스트 소스는 없으므로 `testDebugUnitTest`는 `NO-SOURCE`입니다. 향후 테스트를 추가하면 같은 CI 명령으로 실행됩니다.
+에뮬레이터 기반 UI·차량 서비스 테스트는 CI에 포함되어 있지 않습니다.
