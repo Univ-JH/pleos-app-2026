@@ -1,0 +1,6 @@
+PASS: three unique SDK events, complete trip, valid evidence, no gaps
+PASS: feedback excludes statistic without modifying observations
+PASS: reboot interruption checkpoint preserved without duplicate trip
+PASS: independent 130m normal SDK trip with zero events
+PASS: single-trip deletion preserves other trips and evidence
+PASS: full deletion clears all five tables, integrity ok

@@ -1,0 +1,79 @@
+{
+  "trips": [
+    {
+      "id": "9b05860e-4fe9-4964-b213-5b08c499c0e7",
+      "startedAt": 1793284991470,
+      "endedAt": 1793285047527,
+      "lastSeenAt": 1793285047527,
+      "status": "COMPLETE",
+      "distanceMeters": 272.3234742947224,
+      "validMs": 56058,
+      "missingMs": 0,
+      "simulated": 0
+    },
+    {
+      "id": "651d37b5-882d-4368-8852-df870785491c",
+      "startedAt": 1793285078327,
+      "endedAt": 1793285093437,
+      "lastSeenAt": 1793285093437,
+      "status": "INTERRUPTED",
+      "distanceMeters": 69.82194599717856,
+      "validMs": 15111,
+      "missingMs": 0,
+      "simulated": 0
+    },
+    {
+      "id": "7232687a-75e3-43a6-bee6-c7bb80135f71",
+      "startedAt": 1793285141738,
+      "endedAt": 1793285197885,
+      "lastSeenAt": 1793285197885,
+      "status": "COMPLETE",
+      "distanceMeters": 130.0641699606181,
+      "validMs": 56147,
+      "missingMs": 0,
+      "simulated": 0
+    }
+  ],
+  "events": [
+    {
+      "id": "b95c6c43-fee4-4bc6-8031-7afd4525472a",
+      "tripId": "9b05860e-4fe9-4964-b213-5b08c499c0e7",
+      "kind": "RAPID_START",
+      "timeMs": 1793284996214,
+      "observed": 3.61532916733086,
+      "seat": null,
+      "ruleVersion": "experimental-1",
+      "quality": "유효한 연속 신호"
+    },
+    {
+      "id": "ab30e04d-7fb1-4e98-8167-fab31dbf1469",
+      "tripId": "9b05860e-4fe9-4964-b213-5b08c499c0e7",
+      "kind": "SEAT_BELT",
+      "timeMs": 1793285004583,
+      "observed": 72.0,
+      "seat": "차량 경고 · 좌석 정보 없음",
+      "ruleVersion": "experimental-1",
+      "quality": "유효한 연속 신호"
+    },
+    {
+      "id": "a43780c1-a841-4e92-9483-b9e20e1ad680",
+      "tripId": "9b05860e-4fe9-4964-b213-5b08c499c0e7",
+      "kind": "HARD_BRAKING",
+      "timeMs": 1793285010227,
+      "observed": -4.480287080170005,
+      "seat": null,
+      "ruleVersion": "experimental-1",
+      "quality": "유효한 연속 신호"
+    }
+  ],
+  "feedback": [
+    {
+      "eventId": "a43780c1-a841-4e92-9483-b9e20e1ad680",
+      "reason": "긴급 회피",
+      "includeInStats": 0
+    }
+  ],
+  "integrity": "ok",
+  "sampleCount": 1266,
+  "evidenceCount": 425
+}

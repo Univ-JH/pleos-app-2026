@@ -1,75 +1,46 @@
 package io.github.univjh.pleosapp
 
+import android.Manifest
+import android.content.pm.PackageManager
+import android.os.Build
 import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
-import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.widthIn
-import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.Scaffold
-import androidx.compose.material3.Text
-import androidx.compose.runtime.Composable
-import androidx.compose.ui.Alignment
-import androidx.compose.ui.Modifier
-import androidx.compose.ui.res.stringResource
-import androidx.compose.ui.text.style.TextAlign
-import androidx.compose.ui.tooling.preview.Preview
-import androidx.compose.ui.unit.dp
+import androidx.activity.result.contract.ActivityResultContracts
+import androidx.lifecycle.lifecycleScope
+import io.github.univjh.pleosapp.ui.CoachScreen
 import io.github.univjh.pleosapp.ui.theme.PleosAppTheme
+import kotlinx.coroutines.flow.first
+import kotlinx.coroutines.launch
 
 class MainActivity : ComponentActivity() {
+    private val app get() = application as CoachApplication
+    private val permissionRequest = registerForActivityResult(ActivityResultContracts.RequestMultiplePermissions()) { connect() }
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()
-        setContent {
-            PleosAppTheme {
-                StarterScreen()
-            }
+        setContent { PleosAppTheme { CoachScreen(onPermissions = ::requestPermissions) } }
+        requestPermissions()
+    }
+    private fun requestPermissions() {
+        val permissions = mutableListOf("android.car.permission.CAR_SPEED", "android.car.permission.CAR_POWERTRAIN", "pleos.car.permission.CAR_SAFETY")
+        if (Build.VERSION.SDK_INT >= 33) permissions += Manifest.permission.POST_NOTIFICATIONS
+        val missing = permissions.filter { checkSelfPermission(it) != PackageManager.PERMISSION_GRANTED }
+        if (missing.isEmpty()) connect() else permissionRequest.launch(missing.toTypedArray())
+    }
+    private fun connect() {
+        app.source.start()
+        lifecycleScope.launch {
+            if (app.settings.consent.first()) runCatching {
+                startForegroundService(android.content.Intent(this@MainActivity, io.github.univjh.pleosapp.service.RecordingService::class.java))
+            }.onFailure { app.recorderStatus.value = "자동 기록을 시작하지 못했어요. 권한을 확인해 주세요." }
         }
     }
-}
-
-@Composable
-private fun StarterScreen() {
-    Scaffold(modifier = Modifier.fillMaxSize()) { contentPadding ->
-        Box(
-            modifier = Modifier
-                .fillMaxSize()
-                .padding(contentPadding)
-                .padding(32.dp),
-            contentAlignment = Alignment.Center,
-        ) {
-            Column(
-                modifier = Modifier.widthIn(max = 640.dp),
-                horizontalAlignment = Alignment.CenterHorizontally,
-                verticalArrangement = Arrangement.spacedBy(16.dp),
-            ) {
-                Text(
-                    text = stringResource(R.string.app_name),
-                    style = MaterialTheme.typography.headlineLarge,
-                    textAlign = TextAlign.Center,
-                )
-                Text(
-                    text = stringResource(R.string.starter_message),
-                    style = MaterialTheme.typography.bodyLarge,
-                    color = MaterialTheme.colorScheme.onSurfaceVariant,
-                    textAlign = TextAlign.Center,
-                )
-            }
-        }
-    }
-}
-
-@Preview(name = "Automotive", widthDp = 1024, heightDp = 600)
-@Preview(name = "Compact", widthDp = 400, heightDp = 600)
-@Composable
-private fun StarterScreenPreview() {
-    PleosAppTheme {
-        StarterScreen()
+    override fun onStart() { super.onStart(); app.visible = true; app.source.start() }
+    override fun onStop() {
+        app.visible = false
+        lifecycleScope.launch { if (!app.settings.consent.first() && !app.serviceRunning.value) app.source.stop() }
+        super.onStop()
     }
 }

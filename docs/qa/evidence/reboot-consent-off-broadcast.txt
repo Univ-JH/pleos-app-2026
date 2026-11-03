@@ -1,0 +1,1 @@
+10-29 07:49:18.435 I/ActivityManager(  738): Start proc 5649:io.github.univjh.pleosapp/u10a174 for broadcast {io.github.univjh.pleosapp/io.github.univjh.pleosapp.service.RecordingBootReceiver}

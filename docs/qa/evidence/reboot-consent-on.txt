@@ -1,0 +1,25 @@
+ACTIVITY MANAGER SERVICES (dumpsys activity services)
+  User 10 active services:
+  * ServiceRecord{bc967a1 u10 io.github.univjh.pleosapp/.service.RecordingService}
+    intent={cmp=io.github.univjh.pleosapp/.service.RecordingService}
+    packageName=io.github.univjh.pleosapp
+    processName=io.github.univjh.pleosapp
+    baseDir=/data/app/~~1IDlHZV1L7w4oVxHpYgP_Q==/io.github.univjh.pleosapp-Wu8Ks0Z06o_Uyz8TomesUQ==/base.apk
+    dataDir=/data/user/10/io.github.univjh.pleosapp
+    app=ProcessRecord{59a018e 5578:io.github.univjh.pleosapp/u10a174}
+    mAllowWhileInUsePermissionInFgsReason=DENIED
+    mAllowWIUInBindService=DENIED
+    mAllowWIUByBindings=DENIED
+    allowUiJobScheduling=false
+    recentCallingPackage=io.github.univjh.pleosapp
+    recentCallingUid=1010174
+    allowStartForeground=BOOT_COMPLETED
+    mAllowStartInBindService=DENIED
+    mAllowStartByBindings=DENIED
+    startForegroundCount=1
+    infoAllowStartForeground=[callingPackage: io.github.univjh.pleosapp; callingUid: 1010174; uidState: RCVR; uidBFSL: n/a; intent: Intent { cmp=io.github.univjh.pleosapp/.service.RecordingService }; code:BOOT_COMPLETED; tempAllowListReason:<5f17860 android.intent.action.BOOT_COMPLETED/u10,reasonCode:BOOT_COMPLETED,duration:20000,callingUid:1000>; targetSdkVersion:35; callerTargetSdkVersion:35; startForegroundCount:0; bindFromPackage:null: isBindService:false]
+    isForeground=true foregroundId=1 types=40000000 foregroundNoti=Notification(channel=recording shortcut=null contentView=null vibrate=null sound=null defaults=0x0 flags=0x42 color=0x00000000 groupKey=silent vis=PRIVATE)
+    createTime=-3s746ms startingBgTimeout=--
+    lastActivity=-3s745ms restartTime=-3s745ms createdFromFg=false
+    startRequested=true delayedStop=false stopIfKilled=false callStart=true lastStartId=1
+ startCommandResult=1

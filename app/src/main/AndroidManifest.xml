@@ -1,5 +1,15 @@
 <?xml version="1.0" encoding="utf-8"?>
 <manifest xmlns:android="http://schemas.android.com/apk/res/android">
+  <uses-permission android:name="android.permission.FOREGROUND_SERVICE" />
+  <uses-permission android:name="android.permission.FOREGROUND_SERVICE_SPECIAL_USE" />
+  <uses-permission android:name="android.permission.RECEIVE_BOOT_COMPLETED" />
+  <uses-permission android:name="android.permission.POST_NOTIFICATIONS" />
+  <uses-permission android:name="android.car.permission.CAR_SPEED" />
+  <uses-permission android:name="android.car.permission.CAR_POWERTRAIN" />
+  <uses-permission android:name="pleos.car.permission.CAR_SAFETY" />
+  <!-- Vehicle 2.3.2 getTelltalesInfo runtime implementation requires this normal permission,
+       although the public interface annotation lists CAR_SAFETY. See docs/qa/RESULTS.md. -->
+  <uses-permission android:name="pleos.car.permission.PRIVATE_CAR_SAFETY" />
 
   <uses-feature
     android:name="android.hardware.type.automotive"
@@ -9,15 +19,31 @@
     android:required="false" />
 
   <application
+    android:name=".CoachApplication"
     android:allowBackup="false"
+    android:fullBackupContent="false"
+    android:dataExtractionRules="@xml/data_extraction_rules"
     android:icon="@drawable/ic_launcher"
     android:label="@string/app_name"
     android:supportsRtl="true"
     android:theme="@style/Theme.PleosApp"
     android:usesCleartextTraffic="false">
+    <uses-library android:name="android.car" android:required="false" />
+    <service android:name=".service.RecordingService" android:exported="false"
+      android:foregroundServiceType="specialUse">
+      <property android:name="android.app.PROPERTY_SPECIAL_USE_FGS_SUBTYPE"
+        android:value="User-consented continuous automotive speed, gear and seatbelt signal recording for on-device post-trip safety coaching." />
+    </service>
+    <receiver android:name=".service.RecordingBootReceiver" android:exported="false">
+      <intent-filter>
+        <action android:name="android.intent.action.BOOT_COMPLETED" />
+        <action android:name="android.intent.action.MY_PACKAGE_REPLACED" />
+      </intent-filter>
+    </receiver>
     <activity
       android:name=".MainActivity"
       android:exported="true">
+      <meta-data android:name="distractionOptimized" android:value="true" />
       <intent-filter>
         <action android:name="android.intent.action.MAIN" />
         <category android:name="android.intent.category.LAUNCHER" />

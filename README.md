@@ -1,9 +1,10 @@
-# pleos-app-2026
+# 운전 돌아보기 — Pleos Driving Coach
 
 Pleos Connect app for the 2026 Hyundai Motor Group App Development Challenge.
 
 현대자동차그룹 차량용 앱 개발 공모전을 위한 Android 프로젝트입니다.
-주제는 검토 중이며, 현재는 기본 화면과 Pleos SDK 의존성을 준비한 단계입니다.
+주차 후 관측 장면·안전 지식·개선 추이를 확인하는 온디바이스 안전운전 코치입니다.
+급출발·급감속·안전벨트 경고를 첫 범위로 구현했습니다. 실제 SDK 검증 상태와 남은 조건은 [QA 결과](docs/qa/RESULTS.md)를 확인하세요.
 
 ## 개발 환경
 
@@ -44,25 +45,31 @@ Windows PowerShell:
 - 앱 실행: Pleos Connect AVD를 시작한 뒤 Android Studio의 Run 사용
 - OS별 환경 변수·설치 명령·에뮬레이터 설정: [개발 환경 안내](docs/SETUP.md)
 
-## 현재 범위
+## 사용과 구현 범위
 
-- [x] 주제에 종속되지 않는 Compose 시작 화면과 라이트·다크 테마
-- [x] Gradle Wrapper, 버전 카탈로그, Pleos Maven 저장소 및 SDK 의존성
-- [x] Linux GitHub Actions Debug APK 빌드·Lint 검사 설정
-- [ ] 앱 주제 및 핵심 사용자 시나리오 결정
-- [ ] Vehicle 데이터 조회와 NaviHelper 연동 구현·실기동 검증
-- [ ] 주행 규제 대응, 핵심 기능 테스트, 제출용 서명 APK 준비
+- 최초 권한 허용 후 P 상태를 30초 유지하고 자동 기록에 동의합니다.
+- D/R에서 자동 시작, P + 1 km/h 미만 30초에서 자동 종료합니다.
+- 주행 중에는 기록 상태만 표시합니다. 주차 및 차량 UX 허용 시 리포트·학습·피드백·삭제 기능을 엽니다.
+- Room에 기기 내 기록, DataStore에 동의·목표를 저장합니다. 서버로 전송하지 않습니다.
+- 원시 신호 7일, 리포트·근거 90일 보관 정책을 적용합니다.
+- 부팅 복구, 백그라운드 foreground service, 규칙 버전, 데이터 누락 처리, 테스트 입력 분리가 포함됩니다.
 
-SDK 의존성을 추가한 상태이며, 차량 서비스 연결이나 API 호출 성공을 의미하지 않습니다.
-차량 권한은 구현할 기능이 정해지면 필요한 항목만 추가합니다.
+[구조·규칙·24개 상황 로드맵·서명 방법](docs/IMPLEMENTATION.md) · [실제 테스트 결과](docs/qa/RESULTS.md) · [UI 미리보기·검증](docs/qa/UI.md)
 
 ## 프로젝트 구조
 
 ```text
-app/                    Android 앱, Compose 화면·테마
-gradle/                 의존성 버전과 Gradle Wrapper
-docs/SETUP.md           개발 환경·에뮬레이터·SDK 연동 안내
-.github/workflows/      빌드와 Lint 자동 검사
+app/src/main/java/io/github/univjh/pleosapp/
+  domain/     순수 Kotlin 감지·주행 상태·학습·통계
+  vehicle/    AAOS / Vehicle / NaviHelper 어댑터
+  data/       Room / DataStore / 기록 엔진
+  service/    foreground service / 부팅 복구
+  ui/         ViewModel / Compose
+app/src/test/          분석기·경계값 테스트
+app/src/androidTest/   실제 Room 저장소 테스트
+app/schemas/           Room 스키마 이력
+scripts/qa/            로컬 에뮬레이터 입력 도구
+docs/                  설정·구현·검증 결과
 ```
 
 ## 협업
@@ -73,7 +80,7 @@ docs/SETUP.md           개발 환경·에뮬레이터·SDK 연동 안내
 - PR 전에 위의 OS별 명령으로 `:app:assembleDebug :app:lintDebug :app:testDebugUnitTest`를 실행합니다.
 - `local.properties`, API 키, 서명 키와 비밀번호는 커밋하지 않습니다.
 - SDK 추가·업데이트 시 버전 카탈로그와 개발 환경 문서를 함께 수정합니다.
-- 제출용 APK는 기능 구현 후 서명 설정과 제출 절차를 정해 준비합니다. CI의 Debug APK는 개발 확인용입니다.
+- Release 서명은 로컬 `keystore.properties`로 설정합니다. 키·비밀번호는 Git에서 제외됩니다. CI의 Debug APK는 개발 확인용입니다.
 
 ## GitHub Actions
 

@@ -1,0 +1,6 @@
+
+io.github.univjh.pleosapp.data.RepositoryTest:....
+
+Time: 0.5
+
+OK (4 tests)

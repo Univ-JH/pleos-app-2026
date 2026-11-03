@@ -1,0 +1,6 @@
+
+io.github.univjh.pleosapp.data.SdkSmokeTest:.
+
+Time: 5.381
+
+OK (1 test)
