@@ -81,8 +81,14 @@ docs/SETUP.md           개발 환경·에뮬레이터·SDK 연동 안내
 `main` push, PR, 수동 실행 시 Linux(`ubuntu-24.04`)에서 Android APK 빌드·Lint·단위 테스트를 수행합니다.
 `README.md`, `docs/`의 Markdown 및 `docs/images/`의 이미지 파일만 변경한 경우 Android 단계는 생략합니다.
 그 외 파일, 코드 삭제·이동, 변경 범위를 확인할 수 없는 경우와 수동 실행은 전체 검사를 수행합니다.
+Android 검사가 필요하면 Windows(`windows-2025`)·macOS(`macos-15`)에서도 Debug APK 빌드와 단위 테스트를 실행합니다.
+이 OS별 검사는 필수 검사가 아니며, Linux 검사가 실패해도 따로 결과를 남깁니다.
 Windows·macOS·Linux의 로컬 개발 안내는 [개발 환경 안내](docs/SETUP.md)에 제공합니다.
 Gradle 의존성과 빌드 결과를 캐시하며, PR은 캐시를 읽기만 합니다.
+
+[CodeQL workflow](https://github.com/Univ-JH/pleos-app-2026/actions/workflows/codeql.yml)는
+`main` push와 PR(문서만 바뀐 경우 제외), 그리고 매주 월요일에 Kotlin·Java 코드와 GitHub Actions 워크플로의 보안 취약점을 검사합니다.
+결과는 **Security → Code scanning**에서 확인하며, 필수 검사는 아닙니다.
 Debug APK와 Lint·단위 테스트 보고서는 실행 결과의 Artifacts에서 7일간 다운로드할 수 있습니다.
 캐시 문제를 조사할 때는 **Actions → Android → Run workflow → disable_cache**를 켜서 전체 검사를 실행합니다.
 
