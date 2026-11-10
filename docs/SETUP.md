@@ -199,9 +199,27 @@ adb forward tcp:8088 tcp:8088
 3. `./gradlew --no-daemon --continue --build-cache :app:assembleDebug :app:lintDebug :app:testDebugUnitTest` 실행
 4. Debug APK와 Lint·단위 테스트 보고서를 Actions artifact로 7일 동안 보관
 
-CI는 공통 Android 빌드를 검증하는 Linux 단일 작업입니다.
-Windows·macOS·Linux 로컬 개발자는 위의 OS별 안내에 따라 같은 프로젝트를 빌드합니다.
-`main`에 병합하려면 PR과 Linux CI의 `Build and lint` 통과가 필요합니다.
+Android 검사가 필요하면 Linux 작업의 변경 감지 결과를 받아 다음 OS별 작업도 실행합니다.
+
+| 작업 | Runner | 명령 | 필수 여부 |
+| :--- | :--- | :--- | :--- |
+| `Build and lint` | `ubuntu-24.04` | `./gradlew ... :app:assembleDebug :app:lintDebug :app:testDebugUnitTest` | **필수** |
+| `Build and test (windows-2025)` | `windows-2025` | PowerShell에서 `.\gradlew.bat ... :app:assembleDebug :app:testDebugUnitTest` | 선택 |
+| `Build and test (macos-15)` | `macos-15` | `./gradlew ... :app:assembleDebug :app:testDebugUnitTest` | 선택 |
+
+- Lint는 OS와 무관하므로 Linux에서만 실행합니다. Windows·macOS 작업은 로컬 개발 OS에서 Wrapper 실행, 빌드와 단위 테스트가 되는지 확인합니다.
+- OS별 작업은 Linux 작업이 끝난 뒤 시작하며, Linux 검사가 실패해도 실행됩니다. 실패하면 단위 테스트 보고서를 7일간 보관합니다.
+- 공개 저장소의 표준 GitHub-hosted runner는 사용 시간 제한이 없어 Windows·macOS 작업에 추가 비용이 없습니다.
+- `main`에 병합하려면 PR과 Linux CI의 `Build and lint` 통과가 필요합니다. OS별 작업을 필수로 바꾸려면 브랜치 보호 설정에 작업 이름을 추가합니다.
+
+### CodeQL 코드 스캔
+
+`.github/workflows/codeql.yml`이 Kotlin·Java 앱 코드(`java-kotlin`)와 GitHub Actions 워크플로(`actions`)를 분석합니다.
+
+- `main` push, 모든 PR(다른 PR 위에 쌓은 PR 포함), 매주 월요일 03:27(KST)에 실행합니다. 루트 `README.md`와 `docs/`만 바뀐 push·PR은 생략합니다.
+- Kotlin은 컴파일 과정에서 코드를 추출하므로 빌드 결과 캐시를 끄고 `:app:compileDebugSources`를 실행합니다.
+- 결과는 **Security → Code scanning**에서 확인합니다. 필수 검사는 아니며, PR에서 새 경고가 생기면 PR 화면에 표시됩니다.
+- 저장소 Settings의 Code scanning **Default setup**은 꺼 둡니다. 켜면 이 워크플로의 결과 업로드가 거부됩니다.
 
 ### 캐시와 변경 감지 정책
 
