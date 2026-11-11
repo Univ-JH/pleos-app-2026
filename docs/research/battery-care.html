@@ -1,0 +1,484 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>배터리 케어 근거집</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500&family=IBM+Plex+Sans+KR:wght@400;500;600;700&display=swap">
+<style>
+/* Layout: one reading column (max 800px). Two subject figures carry the evidence: a temperature axis (range loss + ageing regimes) and a 0–100% SOC ruler. */
+:root {
+  --bg: #f4f6f8;
+  --surface: #ffffff;
+  --fg: #16202a;
+  --muted: #556272;
+  --line: #d8dfe6;
+  --accent: #0a6f8a;
+  --cold: #2c63c9;
+  --cold-soft: #e4ecfa;
+  --hot: #c4501f;
+  --hot-soft: #fbe8df;
+  --ok: #1f7a4d;
+  --ok-soft: #dff1e7;
+  --note: #8a5a00;
+  --note-soft: #fdf2d8;
+  --chip-maker-bg: #e0edf3; --chip-maker-fg: #0a5670;
+  --chip-gov-bg: #ebe6f6;   --chip-gov-fg: #4b3a8a;
+  --chip-paper-bg: #e3f0e7; --chip-paper-fg: #23603f;
+  --chip-data-bg: #f5ead8;  --chip-data-fg: #77490c;
+  --chip-news-bg: #e9edf1;  --chip-news-fg: #56606b;
+  --font-body: "IBM Plex Sans KR", "Apple SD Gothic Neo", "Malgun Gothic", system-ui, sans-serif;
+  --font-mono: "IBM Plex Mono", ui-monospace, "SFMono-Regular", Menlo, Consolas, monospace;
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --bg: #0e1419; --surface: #151d24; --fg: #e3eaf0; --muted: #9ba9b7; --line: #28343f; --accent: #52c3dd;
+    --cold: #7ea8ff; --cold-soft: #17243a; --hot: #ff9466; --hot-soft: #3a2219;
+    --ok: #62d29d; --ok-soft: #14301f; --note: #f0c46a; --note-soft: #33290f;
+    --chip-maker-bg: #12303b; --chip-maker-fg: #93d4e8;
+    --chip-gov-bg: #27213f;   --chip-gov-fg: #c5b8f2;
+    --chip-paper-bg: #15301f; --chip-paper-fg: #96dbb2;
+    --chip-data-bg: #33270f;  --chip-data-fg: #f0c785;
+    --chip-news-bg: #212a31;  --chip-news-fg: #acb7c1;
+    color-scheme: dark;
+  }
+}
+:root[data-theme="dark"] {
+  --bg: #0e1419; --surface: #151d24; --fg: #e3eaf0; --muted: #9ba9b7; --line: #28343f; --accent: #52c3dd;
+  --cold: #7ea8ff; --cold-soft: #17243a; --hot: #ff9466; --hot-soft: #3a2219;
+  --ok: #62d29d; --ok-soft: #14301f; --note: #f0c46a; --note-soft: #33290f;
+  --chip-maker-bg: #12303b; --chip-maker-fg: #93d4e8;
+  --chip-gov-bg: #27213f;   --chip-gov-fg: #c5b8f2;
+  --chip-paper-bg: #15301f; --chip-paper-fg: #96dbb2;
+  --chip-data-bg: #33270f;  --chip-data-fg: #f0c785;
+  --chip-news-bg: #212a31;  --chip-news-fg: #acb7c1;
+  color-scheme: dark;
+}
+
+body {
+  background: var(--bg);
+  color: var(--fg);
+  font-family: var(--font-body);
+  font-size: 15.5px;
+  line-height: 1.72;
+  padding-left: max(16px, env(safe-area-inset-left, 0px));
+  padding-right: max(16px, env(safe-area-inset-right, 0px));
+  word-break: keep-all;
+  overflow-wrap: anywhere;
+}
+.wrap { max-width: 800px; margin: 0 auto; padding-block: 40px 72px; display: flex; flex-direction: column; gap: 44px; }
+h1, h2, h3 { margin: 0; text-wrap: balance; line-height: 1.35; }
+h1 { font-size: 2rem; font-weight: 700; letter-spacing: -0.01em; }
+h2 { font-size: 1.38rem; font-weight: 700; }
+h3 { font-size: 1.04rem; font-weight: 600; }
+p { margin: 0; max-width: 68ch; }
+a { color: var(--accent); text-underline-offset: 3px; }
+a:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; border-radius: 2px; }
+.eyebrow { font-family: var(--font-mono); font-size: .74rem; letter-spacing: .08em; text-transform: uppercase; color: var(--accent); }
+.muted { color: var(--muted); }
+.small { font-size: .86rem; }
+
+header { display: flex; flex-direction: column; gap: 14px; }
+.lede { color: var(--muted); font-size: 1.03rem; }
+.meta { font-family: var(--font-mono); font-size: .78rem; color: var(--muted); display: flex; flex-wrap: wrap; gap: 4px 16px; }
+nav.toc { display: flex; flex-wrap: wrap; gap: 6px 18px; font-size: .92rem; }
+nav.toc a { text-decoration: none; }
+nav.toc a:hover { text-decoration: underline; }
+
+section { display: flex; flex-direction: column; gap: 18px; border-top: 1px solid var(--line); padding-top: 30px; scroll-margin-top: 16px; }
+.sub { display: flex; flex-direction: column; gap: 12px; }
+
+.takeaways { list-style: none; padding: 0; margin: 0; display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 12px; }
+.takeaways li { background: var(--surface); border: 1px solid var(--line); border-radius: 10px; padding: 14px 16px; display: flex; flex-direction: column; gap: 6px; min-width: 0; }
+.takeaways strong { font-size: 1rem; font-weight: 600; }
+.takeaways span { color: var(--muted); font-size: .9rem; line-height: 1.6; }
+@media (max-width: 620px) { .takeaways { grid-template-columns: 1fr; } }
+
+.chip { display: inline-block; font-size: .72rem; font-weight: 600; line-height: 1.6; padding: 0 8px; border-radius: 999px; white-space: nowrap; vertical-align: 1px; }
+.chip.maker { background: var(--chip-maker-bg); color: var(--chip-maker-fg); }
+.chip.gov   { background: var(--chip-gov-bg);   color: var(--chip-gov-fg); }
+.chip.paper { background: var(--chip-paper-bg); color: var(--chip-paper-fg); }
+.chip.data  { background: var(--chip-data-bg);  color: var(--chip-data-fg); }
+.chip.news  { background: var(--chip-news-bg);  color: var(--chip-news-fg); }
+.legend { display: flex; flex-wrap: wrap; gap: 8px 16px; font-size: .85rem; color: var(--muted); align-items: center; }
+.legend span { display: inline-flex; align-items: center; gap: 6px; }
+
+.table-wrap { overflow-x: auto; border: 1px solid var(--line); border-radius: 10px; background: var(--surface); }
+table { border-collapse: collapse; width: 100%; min-width: 580px; font-size: .91rem; line-height: 1.6; }
+th, td { padding: 10px 14px; text-align: left; vertical-align: top; border-bottom: 1px solid var(--line); }
+th { font-size: .77rem; color: var(--muted); font-weight: 600; letter-spacing: .02em; background: var(--bg); white-space: nowrap; }
+tr:last-child td { border-bottom: 0; }
+td.num { font-family: var(--font-mono); font-variant-numeric: tabular-nums; white-space: nowrap; }
+td .chip { margin-right: 4px; }
+
+ul.points { margin: 0; padding-left: 1.15em; display: flex; flex-direction: column; gap: 8px; max-width: 70ch; }
+ul.points li::marker { color: var(--muted); }
+
+figure { margin: 0; background: var(--surface); border: 1px solid var(--line); border-radius: 10px; padding: 16px; display: flex; flex-direction: column; gap: 10px; min-width: 0; }
+figcaption { font-size: .83rem; color: var(--muted); line-height: 1.6; }
+.chart-scroll { overflow-x: auto; }
+.chart-scroll svg { display: block; width: 100%; min-width: 520px; height: auto; }
+svg text { font-family: var(--font-mono); font-size: 11px; fill: var(--muted); }
+svg .label-strong { fill: var(--fg); font-weight: 500; }
+svg .region-cold { fill: var(--cold-soft); }
+svg .region-hot { fill: var(--hot-soft); }
+svg .region-cold-text { fill: var(--cold); font-family: var(--font-body); font-size: 11px; }
+svg .region-hot-text { fill: var(--hot); font-family: var(--font-body); font-size: 11px; }
+svg .grid { stroke: var(--line); stroke-width: 1; fill: none; }
+svg .divider { stroke: var(--muted); stroke-width: 1; stroke-dasharray: 4 4; fill: none; }
+svg .series { stroke: var(--accent); stroke-width: 2.5; fill: none; }
+svg .dot { fill: var(--surface); stroke: var(--accent); stroke-width: 2.5; }
+
+.soc { display: flex; flex-direction: column; gap: 10px; }
+.soc-row { display: grid; grid-template-columns: minmax(0, 210px) minmax(0, 1fr); gap: 14px; align-items: center; }
+.soc-label { font-size: .86rem; line-height: 1.45; }
+.soc-label small { display: block; color: var(--muted); font-size: .78rem; }
+.track { position: relative; height: 22px; background: var(--bg); border: 1px solid var(--line); border-radius: 4px; }
+.band { position: absolute; top: 3px; bottom: 3px; border-radius: 3px; background: var(--ok-soft); border: 1px solid var(--ok); }
+.band.upto { border-left-color: transparent; border-top-color: transparent; border-bottom-color: transparent; border-right-width: 3px; }
+.band.avoid { background: var(--hot-soft); border-color: var(--hot); }
+.mark { position: absolute; top: -4px; bottom: -4px; width: 3px; margin-left: -1px; background: var(--accent); border-radius: 2px; }
+.scale { position: relative; height: 18px; font-family: var(--font-mono); font-size: .72rem; color: var(--muted); }
+.scale span { position: absolute; top: 0; transform: translateX(-50%); }
+.scale span:first-child { transform: none; }
+.scale span:last-child { transform: translateX(-100%); }
+@media (max-width: 560px) { .soc-row { grid-template-columns: 1fr; gap: 6px; } .soc-row.scale-row > div:first-child { display: none; } }
+
+.note { background: var(--note-soft); border-radius: 8px; padding: 12px 16px; display: flex; flex-direction: column; gap: 4px; font-size: .9rem; }
+.note b { color: var(--note); font-size: .78rem; letter-spacing: .04em; }
+
+.sources { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 20px 28px; }
+.sources div { display: flex; flex-direction: column; gap: 8px; min-width: 0; }
+.sources ul { margin: 0; padding-left: 1.1em; display: flex; flex-direction: column; gap: 6px; font-size: .88rem; line-height: 1.55; }
+@media (max-width: 620px) { .sources { grid-template-columns: 1fr; } }
+
+footer { font-size: .82rem; color: var(--muted); border-top: 1px solid var(--line); padding-top: 18px; }
+@media (prefers-reduced-motion: reduce) { * { scroll-behavior: auto !important; } }
+html { scroll-behavior: smooth; }
+</style>
+</head>
+<body>
+
+<div class="wrap">
+  <header>
+    <div class="eyebrow">#6 충전량 추천 · 근거 조사</div>
+    <h1>배터리 케어 근거집</h1>
+    <p class="lede">날씨, 충전량, 급속충전, 장기 주차에 따라 전기차 배터리를 어떻게 다뤄야 하는지 공식 문서·논문·대규모 실차 데이터에서 확인한 내용을 모았습니다. 마지막에는 #6 앱의 추천 규칙 초안으로 연결했습니다.</p>
+    <div class="meta"><span>조사일 2026-11-11</span><span>공식 문서 9 · 논문 5 · 실차 데이터 2</span></div>
+    <nav class="toc" aria-label="목차">
+      <a href="#summary">요약</a>
+      <a href="#temperature">온도</a>
+      <a href="#soc">충전량·장기 주차</a>
+      <a href="#fast-charging">급속충전</a>
+      <a href="#driving">운전·공조</a>
+      <a href="#conflicts">권장이 다른 지점</a>
+      <a href="#rules">앱 규칙 초안</a>
+      <a href="#limits">한계</a>
+      <a href="#sources">출처</a>
+    </nav>
+  </header>
+
+  <section id="summary" aria-labelledby="summary-h">
+    <h2 id="summary-h">출처들이 공통으로 권하는 네 가지</h2>
+    <ul class="takeaways">
+      <li><strong>가득 찬 상태로 오래 두지 않기</strong><span>문제는 100% 충전이 아니라 높은 충전량에 오래 머무는 것입니다. 현대 USA는 일상 25~75%를 권합니다.</span></li>
+      <li><strong>덥거나 추울 때는 충전기에 꽂아 두기</strong><span>배터리 대신 외부 전력으로 차가 스스로 온도를 관리합니다. 현대 USA와 테슬라가 같은 권장을 합니다.</span></li>
+      <li><strong>급속충전은 필요할 때만</strong><span>100kW 넘는 급속 위주 차량은 연 3.0%, 완속 위주는 연 1.5% 열화했습니다(Geotab 22,700대).</span></li>
+      <li><strong>추울 때는 미리 데우기</strong><span>출발 30~45분 전 예열, 급속충전소 도착 전 배터리 예열을 권합니다. 저온 급속충전은 리튬 석출 위험이 있습니다.</span></li>
+    </ul>
+    <div class="legend" aria-label="출처 구분">
+      <span><i class="chip maker">제조사</i>현대·테슬라 공식 문서</span>
+      <span><i class="chip gov">정부·연구소</i>미국 에너지부·ANL·서울시</span>
+      <span><i class="chip paper">논문</i>동료심사 학술지</span>
+      <span><i class="chip data">실차 데이터</i>Geotab 텔레매틱스</span>
+      <span><i class="chip news">보도</i>원문 미확인</span>
+    </div>
+  </section>
+
+  <section id="temperature" aria-labelledby="temp-h">
+    <h2 id="temp-h">온도</h2>
+    <p>기온은 주행거리를 바로 줄이고, 배터리가 늙는 방식도 바꿉니다. 아래 그림은 두 가지를 한 축에 겹쳐 보여줍니다.</p>
+
+    <figure>
+      <div class="chart-scroll">
+        <svg viewBox="0 0 640 300" role="img" aria-label="외기온에 따른 주행거리 변화. 22도 대비 영하 18도 46퍼센트, 영하 7도 59퍼센트, 35도 86퍼센트. 25도 아래는 리튬 석출, 위는 SEI 성장이 주된 열화 원인.">
+          <rect class="region-cold" x="60" y="30" width="412.5" height="220"/>
+          <rect class="region-hot" x="472.5" y="30" width="137.5" height="220"/>
+          <line class="grid" x1="60" y1="250" x2="610" y2="250"/>
+          <line class="grid" x1="60" y1="187.1" x2="610" y2="187.1"/>
+          <line class="grid" x1="60" y1="124.3" x2="610" y2="124.3"/>
+          <line class="grid" x1="60" y1="61.4" x2="610" y2="61.4"/>
+          <text x="52" y="254" text-anchor="end">40</text>
+          <text x="52" y="191" text-anchor="end">60</text>
+          <text x="52" y="128" text-anchor="end">80</text>
+          <text x="52" y="65" text-anchor="end">100</text>
+          <text x="60" y="268" text-anchor="middle">−20</text>
+          <text x="151.7" y="268" text-anchor="middle">−10</text>
+          <text x="243.3" y="268" text-anchor="middle">0</text>
+          <text x="335" y="268" text-anchor="middle">10</text>
+          <text x="426.7" y="268" text-anchor="middle">20</text>
+          <text x="518.3" y="268" text-anchor="middle">30</text>
+          <text x="610" y="268" text-anchor="middle">40</text>
+          <text x="335" y="292" text-anchor="middle">외기온 (°C)</text>
+          <text x="16" y="140" text-anchor="middle" transform="rotate(-90 16 140)">22°C 대비 주행거리 (%)</text>
+          <line class="divider" x1="472.5" y1="30" x2="472.5" y2="250"/>
+          <text x="472.5" y="22" text-anchor="middle">25°C</text>
+          <text class="region-cold-text" x="70" y="50">25°C 아래</text>
+          <text class="region-cold-text" x="70" y="65">리튬 석출이 주된 열화</text>
+          <text class="region-hot-text" x="480" y="226">25°C 위</text>
+          <text class="region-hot-text" x="480" y="241">SEI 성장·양극 열화</text>
+          <polyline class="series" points="78.3,231.1 179.2,190.3 445,61.4 564.2,105.4"/>
+          <circle class="dot" cx="78.3" cy="231.1" r="4.5"/>
+          <circle class="dot" cx="179.2" cy="190.3" r="4.5"/>
+          <circle class="dot" cx="445" cy="61.4" r="4.5"/>
+          <circle class="dot" cx="564.2" cy="105.4" r="4.5"/>
+          <text class="label-strong" x="86" y="245">−18°C · 46%</text>
+          <text class="label-strong" x="190" y="206">−7°C · 59%</text>
+          <text class="label-strong" x="436" y="52" text-anchor="end">22°C 기준 100%</text>
+          <text class="label-strong" x="564" y="120" text-anchor="middle">35°C · 86%</text>
+        </svg>
+      </div>
+      <figcaption>주행거리: 미국 아르곤 국립연구소(ANL) 차대동력계 시험, 실내를 22°C로 유지한 4개 온도의 평균. 점 사이 선은 시험 온도를 이은 것입니다. 열화 구간: Waldmann 등 2014, −20~70°C 노화 시험의 사후 분석. Geotab 실차 데이터(4,200대)도 21.5°C에서 효율이 가장 좋고 −15°C에서 정격의 54%로 같은 경향을 보입니다.</figcaption>
+    </figure>
+
+    <div class="sub">
+      <h3>저온(겨울)</h3>
+      <div class="table-wrap">
+        <table>
+          <thead><tr><th>조건</th><th>주행거리</th><th>출처</th></tr></thead>
+          <tbody>
+            <tr><td class="num">−7°C</td><td>22°C 대비 <b>41% 감소</b> (실내 22°C 유지)</td><td><span class="chip gov">정부·연구소</span>ANL</td></tr>
+            <tr><td class="num">−18°C</td><td>22°C 대비 <b>54% 감소</b> (같은 조건)</td><td><span class="chip gov">정부·연구소</span>ANL</td></tr>
+            <tr><td class="num">−15°C</td><td>정격 주행거리의 <b>54%</b></td><td><span class="chip data">실차 데이터</span>Geotab 4,200대·520만 회 주행</td></tr>
+            <tr><td class="num">겨울 일반</td><td>평소보다 약 <b>10~30% 감소</b></td><td><span class="chip maker">제조사</span>현대차그룹</td></tr>
+          </tbody>
+        </table>
+      </div>
+      <ul class="points">
+        <li>25°C 아래에서는 <b>리튬 석출</b>(리튬이 음극 표면에 금속으로 쌓이는 현상)이 주된 열화 원인입니다. <span class="chip paper">논문</span> Waldmann 2014</li>
+        <li>이 현상은 <b>저온에서 급속충전할 때</b> 특히 위험해서, 충전 전 예열과 열관리가 해법으로 제시됩니다. <span class="chip paper">논문</span> Tomaszewska 2019</li>
+        <li>추위로 인한 손실의 상당 부분은 <b>난방 에너지</b>입니다. 히트펌프, 열선시트, 사전 공조로 줄일 수 있습니다. <span class="chip gov">정부·연구소</span> ANL</li>
+      </ul>
+      <h3>권장 행동</h3>
+      <ul class="points">
+        <li><b>출발 30~45분 전 공조를 켜서</b> 실내와 배터리를 미리 데웁니다. <span class="chip maker">제조사</span> 테슬라</li>
+        <li><b>쓰지 않을 때는 충전기에 꽂아 둡니다.</b> 배터리가 아니라 충전 시스템의 전력으로 배터리를 데웁니다. <span class="chip maker">제조사</span> 테슬라</li>
+        <li><b>급속충전소에 가기 전에 배터리를 예열</b>하면 충전 시간이 줄어듭니다. 테슬라는 도착 30~45분 전부터 내비 안내를 켜라고 권합니다. <span class="chip maker">제조사</span> 현대차그룹·테슬라</li>
+        <li><b>히트펌프와 열선시트</b>를 활용합니다. 실내 전체를 데우는 것보다 전력이 적게 듭니다. <span class="chip gov">정부·연구소</span> ANL · <span class="chip maker">제조사</span> 현대차그룹</li>
+      </ul>
+    </div>
+
+    <div class="sub">
+      <h3>고온(여름)</h3>
+      <div class="table-wrap">
+        <table>
+          <thead><tr><th>항목</th><th>내용</th><th>출처</th></tr></thead>
+          <tbody>
+            <tr><td>35°C 주행거리</td><td>22°C 대비 <b>14% 감소</b></td><td><span class="chip gov">정부·연구소</span>ANL</td></tr>
+            <tr><td>손해가 거의 없는 구간</td><td>10°C~30°C 남짓에서 정격 주행거리 이상, 21.5°C에서 최고</td><td><span class="chip data">실차 데이터</span>Geotab</td></tr>
+            <tr><td>수명</td><td>더운 기후에서 운행한 차는 매년 <b>0.4%p 더 빨리</b> 열화</td><td><span class="chip data">실차 데이터</span>Geotab 22,700대</td></tr>
+            <tr><td>열화 원인</td><td>25°C 위에서는 음극 표면 피막(SEI) 성장과 양극 열화가 주된 원인</td><td><span class="chip paper">논문</span>Waldmann 2014</td></tr>
+          </tbody>
+        </table>
+      </div>
+      <h3>권장 행동</h3>
+      <ul class="points">
+        <li><b>그늘에 주차하거나 주차 중 충전기에 꽂아 둡니다.</b> 차량 열관리 시스템이 더 효율적으로 작동합니다. <span class="chip maker">제조사</span> 현대 USA</li>
+        <li><b>직사광선을 피하고 지하·실내 주차</b>를 활용합니다. <span class="chip maker">제조사</span> 현대차그룹</li>
+        <li><b>장시간 고속 주행 직후 급속충전을 반복하지 않습니다.</b> 배터리 온도가 올라 충전 속도가 제한됩니다. <span class="chip maker">제조사</span> 현대차그룹</li>
+      </ul>
+      <div class="note">
+        <b>화재 관련 정책 · 서울시 2024년 8월</b>
+        <span>공동주택 지하주차장에는 90% 이하로 충전 제한을 건 전기차만 들어가도록 권고했고(강제 아님), 시가 운영하는 급속충전기는 80%까지만 충전하도록 했습니다. 서울시도 보도자료에서 효과에 일부 논란이 있다고 밝혔고, 실제 시행 현황은 확인하지 못했습니다.</span>
+      </div>
+    </div>
+  </section>
+
+  <section id="soc" aria-labelledby="soc-h">
+    <h2 id="soc-h">충전량과 장기 주차</h2>
+    <p>출처마다 권하는 충전 범위를 같은 0~100% 눈금 위에 놓았습니다. 초록은 권장 범위나 상한, 주황은 피해야 할 구간, 세로 막대는 특정 값입니다.</p>
+    <figure>
+      <div class="soc">
+        <div class="soc-row">
+          <div class="soc-label">현대 USA · 일상 최적<small>25~75%, 필요하면 100%도 가능</small></div>
+          <div class="track"><div class="band" style="left:25%;width:50%"></div></div>
+        </div>
+        <div class="soc-row">
+          <div class="soc-label">테슬라 · 일상 상한<small>80% 권장 차량 기준</small></div>
+          <div class="track"><div class="band upto" style="left:0;width:80%"></div></div>
+        </div>
+        <div class="soc-row">
+          <div class="soc-label">서울시 · 지하주차장 출입<small>90% 이하 권고</small></div>
+          <div class="track"><div class="band upto" style="left:0;width:90%"></div></div>
+        </div>
+        <div class="soc-row">
+          <div class="soc-label">서울시 · 시 운영 급속충전기<small>80%에서 충전 종료</small></div>
+          <div class="track"><div class="band upto" style="left:0;width:80%"></div></div>
+        </div>
+        <div class="soc-row">
+          <div class="soc-label">Wikner 2018 · 수명 실험<small>일상 상한 50%, 주차 중 15%</small></div>
+          <div class="track"><div class="band upto" style="left:0;width:50%"></div><div class="mark" style="left:15%"></div></div>
+        </div>
+        <div class="soc-row">
+          <div class="soc-label">현대 사용설명서 · 장기 보관<small>10% 미만으로 오래 두지 말 것</small></div>
+          <div class="track"><div class="band avoid" style="left:0;width:10%"></div></div>
+        </div>
+        <div class="soc-row">
+          <div class="soc-label">Geotab · 열화가 빨라지는 경우<small>전체 시간의 80% 이상을 양 끝에서 보낼 때</small></div>
+          <div class="track"><div class="band avoid" style="left:0;width:6%"></div><div class="band avoid" style="left:94%;width:6%"></div></div>
+        </div>
+        <div class="soc-row scale-row" aria-hidden="true">
+          <div></div>
+          <div class="scale"><span style="left:0">0</span><span style="left:25%">25</span><span style="left:50%">50</span><span style="left:75%">75</span><span style="left:100%">100%</span></div>
+        </div>
+      </div>
+      <figcaption>제조사는 계기판 0~100% 바깥에 3~5% 여유 구간을 따로 남겨 둡니다(서울시 보도자료). Geotab의 양 끝 구간 폭은 "거의 완충·거의 방전"을 나타낸 그림이며, 정확한 경계값은 원문에 없습니다.</figcaption>
+    </figure>
+
+    <div class="table-wrap">
+      <table>
+        <thead><tr><th>권장 사항</th><th>출처</th></tr></thead>
+        <tbody>
+          <tr><td>오래 비울 때(휴가 등)는 예약 충전으로 <b>25~75%</b> 유지</td><td><span class="chip maker">제조사</span>현대 USA</td></tr>
+          <tr><td><b>10% 미만</b>으로 오래 두면 배터리 손상이나 교체로 이어질 수 있음</td><td><span class="chip maker">제조사</span>현대 사용설명서 2026</td></tr>
+          <tr><td>오래 안 탈 때도 <b>3개월에 한 번 이상</b> 충전</td><td><span class="chip maker">제조사</span>현대 사용설명서</td></tr>
+          <tr><td>20% 이하일 때 완충하면 좋은 상태 유지에 도움, <b>월 1회 이상</b> 권장</td><td><span class="chip maker">제조사</span>현대 사용설명서</td></tr>
+          <tr><td>높은 충전량으로 보관하면 캘린더 열화가 빨라짐. 다만 열화 속도는 충전량 20~30% 폭 구간마다 계단처럼 비슷함</td><td><span class="chip paper">논문</span>Keil 등 2016</td></tr>
+          <tr><td>일상 상한을 50%로 낮추면 기대수명 <b>44~130%</b> 증가. 주차 중 15% 유지 등 높은 충전량에 머무는 시간을 줄이면 캘린더 열화가 크게 감소</td><td><span class="chip paper">논문</span>Wikner·Thiringer 2018</td></tr>
+          <tr><td>기온과 충전량에 따른 캘린더 열화 모델(앱의 열화 추정에 쓸 수 있는 형태)</td><td><span class="chip paper">논문</span>Schmalstieg 등 2014</td></tr>
+          <tr><td><b>반대 의견:</b> 대부분은 완충·방전을 걱정할 필요 없음. 전체 시간의 80% 이상을 거의 완충이나 거의 방전 상태로 보낼 때만 열화가 빨라짐</td><td><span class="chip data">실차 데이터</span>Geotab</td></tr>
+        </tbody>
+      </table>
+    </div>
+    <p><b>결론:</b> 문제는 100%까지 충전하는 것이 아니라 가득 찬 상태로 오래 두는 것입니다.</p>
+  </section>
+
+  <section id="fast-charging" aria-labelledby="fast-h">
+    <h2 id="fast-h">급속충전</h2>
+    <ul class="points">
+      <li><b>잦은 급속(DC) 충전은 수명에 영향</b>을 주니 가능하면 완속(AC)을 씁니다. <span class="chip maker">제조사</span> 현대 사용설명서·현대 USA</li>
+      <li><b>100kW 넘는 급속 위주 차량은 연 3.0%</b>, 완속·저출력 위주 차량은 연 1.5% 열화했습니다. 전체 평균은 연 2.3%였고, Geotab은 급속 출력이 단일 요인 중 가장 크다고 봤습니다. <span class="chip data">실차 데이터</span> Geotab 22,700대</li>
+      <li><b>저온 급속충전</b>은 리튬 석출 위험이 커서 예열이 필요합니다. <span class="chip paper">논문</span> Tomaszewska 2019</li>
+    </ul>
+    <div class="table-wrap">
+      <table>
+        <thead><tr><th>공공 충전기 출력</th><th>요금 (1kWh)</th><th>84kWh 차량 10→80% 예시</th></tr></thead>
+        <tbody>
+          <tr><td>30kW 미만 완속</td><td class="num">295원</td><td>약 17,350원 · 6~8시간</td></tr>
+          <tr><td>100kW 이상 ~ 200kW 미만</td><td class="num">348.4원</td><td>약 20,500원 · 30~40분</td></tr>
+          <tr><td>200kW 이상 초급속</td><td class="num">393.1원</td><td>약 23,000원 · 20~30분</td></tr>
+        </tbody>
+      </table>
+    </div>
+    <p class="small muted">2026년 8월 개편된 기후에너지환경부 공공 충전시설 요금. 출처: 현대차그룹 스마트 EV 라이프 가이드. 시간은 차량과 배터리 온도에 따라 달라집니다.</p>
+  </section>
+
+  <section id="driving" aria-labelledby="driving-h">
+    <h2 id="driving-h">운전 습관과 공조</h2>
+    <ul class="points">
+      <li><b>고속 주행</b>은 전비를 크게 떨어뜨립니다. 84kWh 차량이 도심 전비 6km/kWh면 약 504km, 고속에서 4km/kWh면 약 336km입니다. <span class="chip maker">제조사</span> 현대차그룹</li>
+      <li><b>급가속을 줄이고 회생제동을 활용</b>하며, 공조는 적정 온도로 유지합니다. <span class="chip maker">제조사</span> 현대차그룹·현대 사용설명서</li>
+      <li>기온 차이만으로 <b>지역별 연간 에너지 소비가 최대 약 15%</b> 달라졌습니다(미국, 닛산 리프 운전자 데이터). <span class="chip paper">논문</span> Yuksel·Michalek 2015</li>
+    </ul>
+  </section>
+
+  <section id="conflicts" aria-labelledby="conflicts-h">
+    <h2 id="conflicts-h">출처마다 권장이 다른 지점</h2>
+    <div class="table-wrap">
+      <table>
+        <thead><tr><th>일상 충전 상한</th><th>관점</th><th>출처</th></tr></thead>
+        <tbody>
+          <tr><td class="num">25~75%</td><td>배터리 수명</td><td><span class="chip maker">제조사</span>현대 USA</td></tr>
+          <tr><td class="num">80%</td><td>일상 권장값</td><td><span class="chip maker">제조사</span>테슬라</td></tr>
+          <tr><td class="num">90%</td><td>화재 예방</td><td><span class="chip gov">정부·연구소</span>서울시</td></tr>
+          <tr><td>크게 신경 쓸 필요 없음</td><td>실차 데이터</td><td><span class="chip data">실차 데이터</span>Geotab</td></tr>
+        </tbody>
+      </table>
+    </div>
+    <ul class="points">
+      <li>현대 사용설명서의 <b>월 1회 완충</b>은 높은 충전량을 피하라는 논문 결과와 충돌해 보입니다. 배터리 관리 시스템(BMS)의 잔량 보정 목적일 수 있지만, 이는 추정이고 설명서에 이유는 적혀 있지 않습니다.</li>
+      <li><b>#6 앱에 주는 시사점:</b> 정답 하나를 제시하기보다 사용자 목적(수명·비용·안전)에 따라 근거와 함께 추천하는 구조가 맞습니다. 그 자체가 차별점이 될 수 있습니다.</li>
+    </ul>
+  </section>
+
+  <section id="rules" aria-labelledby="rules-h">
+    <h2 id="rules-h">#6 앱 추천 규칙 초안</h2>
+    <div class="table-wrap">
+      <table>
+        <thead><tr><th>상황</th><th>추천 행동</th><th>근거</th></tr></thead>
+        <tbody>
+          <tr><td>평소</td><td>목표 충전량 = 다음 날 필요량 + 여유분. 상한은 75~80%</td><td>현대 USA, 테슬라, Keil, Wikner</td></tr>
+          <tr><td>다음 날 영하 예보</td><td>필요량에 저온 손실을 더함(−7°C에서 최대 약 40%). 출발 시각에 맞춰 충전을 끝내고, 플러그를 꽂은 채 예열</td><td>ANL, Geotab, 현대차그룹, 테슬라</td></tr>
+          <tr><td>추운 날 급속충전소로 이동</td><td>도착 30~45분 전부터 배터리 예열 안내</td><td>테슬라, 현대차그룹, Tomaszewska</td></tr>
+          <tr><td>폭염 + 실외 주차</td><td>그늘·실내 주차, 플러그 연결 유지, 고속 주행 직후 연속 급속충전 피하기</td><td>현대 USA, 현대차그룹, Geotab</td></tr>
+          <tr><td>장기 주차(휴가)</td><td>25~75%(50% 안팎) 유지. 10% 미만 금지, 3개월 안에 충전</td><td>현대 USA, 현대 사용설명서, Wikner</td></tr>
+          <tr><td>서울 공동주택 지하주차장</td><td>90% 이하</td><td>서울시</td></tr>
+          <tr><td>급속충전 비중이 높음</td><td>완속 전환을 제안하고 비용 차이를 보여줌</td><td>Geotab, 현대 사용설명서, 공공 요금표</td></tr>
+        </tbody>
+      </table>
+    </div>
+    <div class="note">
+      <b>차 안 앱만의 강점</b>
+      <span>위 손실률은 모두 평균값이라 히트펌프 유무 등에 따라 차마다 다릅니다. 차 안의 앱은 이 차의 기온별 실제 전비를 스스로 쌓아 보정할 수 있고, 폰 앱은 이 부분을 따라 하기 어렵습니다.</span>
+    </div>
+  </section>
+
+  <section id="limits" aria-labelledby="limits-h">
+    <h2 id="limits-h">한계</h2>
+    <ul class="points">
+      <li>논문 대부분은 <b>배터리 셀 단위 실험</b>입니다. 실차는 제조사가 3~5% 여유 구간을 따로 두므로 실제 효과는 논문 수치보다 작을 수 있습니다.</li>
+      <li><b>보도로만 확인한 수치</b>는 본문 표에서 뺐습니다: AAA 2026 시험(더위 8.5%, 추위 39% 감소)과 환경부 저온(−7°C) 주행거리 인증 제도. <span class="chip news">보도</span></li>
+      <li>논문은 <b>초록과 공식 요약만</b> 확인했고, 본문 그래프의 세부 수치는 직접 보지 않았습니다.</li>
+    </ul>
+  </section>
+
+  <section id="sources" aria-labelledby="sources-h">
+    <h2 id="sources-h">출처</h2>
+    <div class="sources">
+      <div>
+        <h3><span class="chip maker">제조사</span></h3>
+        <ul>
+          <li><a href="https://www.hyundaimotorgroup.com/ko/story/smart-ev-life-guide-charging-care" target="_blank" rel="noopener">현대차그룹 · 충전부터 케어까지, 스마트 EV 라이프 가이드 (2026-07)</a></li>
+          <li><a href="https://ownersmanual.hyundai.com/full_webhelp/NE1a/2026/en_US/id416ac10bed8.html" target="_blank" rel="noopener">Hyundai Owner's Manual · Precautions When Using the High Voltage Battery (2026)</a></li>
+          <li><a href="https://www.hyundaiusa.com/us/ko/hybrid-and-ev/charging" target="_blank" rel="noopener">현대 USA · 전기차 충전, 배터리 관리</a></li>
+          <li><a href="https://www.tesla.com/ownersmanual/model3/en_sg/GUID-F907200E-A619-4A95-A0CF-94E0D03BEBEF.html" target="_blank" rel="noopener">Tesla · Cold Weather Best Practices</a></li>
+          <li><a href="https://www.tesla.com/support/range" target="_blank" rel="noopener">Tesla · Range Tips</a></li>
+        </ul>
+      </div>
+      <div>
+        <h3><span class="chip gov">정부·연구소</span></h3>
+        <ul>
+          <li><a href="https://vms.taps.anl.gov/research-highlights/vehicle-technologies/bev-xtreme-weather/" target="_blank" rel="noopener">Argonne National Laboratory · Passenger Car BEVs under Extreme Weather</a></li>
+          <li><a href="https://www.energy.gov/sites/default/files/2024-10/Impact_of_Cold_Ambient_Temperature_on_BEV_Performance_v15_TechEditFinal_12Sep2024__0.pdf" target="_blank" rel="noopener">U.S. DOE · Impact of Cold Ambient Temperature on BEV Performance (2024)</a></li>
+          <li><a href="https://news.seoul.go.kr/env/archives/558909" target="_blank" rel="noopener">서울시 · 공동주택 지하주차장 충전율 90% 전기차 제한 도입 (2024-08)</a></li>
+        </ul>
+      </div>
+      <div>
+        <h3><span class="chip paper">논문</span></h3>
+        <ul>
+          <li><a href="https://www.mdpi.com/2076-3417/8/10/1825" target="_blank" rel="noopener">Wikner &amp; Thiringer · Extending Battery Lifetime by Avoiding High SOC · Applied Sciences 2018</a></li>
+          <li><a href="https://portal.fis.tum.de/en/publications/calendar-aging-of-lithium-ion-batteries-i-impact-of-the-graphite-/" target="_blank" rel="noopener">Keil et al. · Calendar Aging of Lithium-Ion Batteries I · J. Electrochem. Soc. 2016</a></li>
+          <li><a href="https://ui.adsabs.harvard.edu/abs/2014JPS...262..129W" target="_blank" rel="noopener">Waldmann et al. · Temperature dependent ageing mechanisms in Li-ion batteries · J. Power Sources 2014</a></li>
+          <li><a href="https://spiral.imperial.ac.uk/handle/10044/1/72827" target="_blank" rel="noopener">Tomaszewska et al. · Lithium-ion battery fast charging: A review · eTransportation 2019</a></li>
+          <li><a href="https://typeset.io/papers/a-holistic-aging-model-for-li-nimnco-o2-based-18650-lithium-13rsylloje" target="_blank" rel="noopener">Schmalstieg et al. · A holistic aging model for Li(NiMnCo)O2 18650 cells · J. Power Sources 2014</a></li>
+          <li><a href="https://www.cmu.edu/me/ddl/publications/2015-EST-Yuksel-Michalek-EV-Weather.pdf" target="_blank" rel="noopener">Yuksel &amp; Michalek · Effects of Regional Temperature on EV Efficiency, Range, and Emissions · ES&amp;T 2015</a></li>
+        </ul>
+      </div>
+      <div>
+        <h3><span class="chip data">실차 데이터</span> <span class="chip news">보도</span></h3>
+        <ul>
+          <li><a href="https://www.geotab.com/blog/ev-battery-health/" target="_blank" rel="noopener">Geotab · EV Battery Health, 22,700 Vehicle Analysis</a></li>
+          <li><a href="https://www.geotab.com/blog/ev-range" target="_blank" rel="noopener">Geotab · To what degree does temperature impact EV range?</a></li>
+          <li><a href="https://www.wfae.org/united-states-world/2026-05-01/how-well-can-evs-handle-the-heat-and-the-cold-aaa-put-them-to-the-test" target="_blank" rel="noopener">보도 · AAA 2026 고온·저온 주행거리 시험 (WFAE)</a></li>
+          <li><a href="https://newstomato.com/ReadNews.aspx?no=1209147" target="_blank" rel="noopener">보도 · 환경부 저온 주행거리 기준 (뉴스토마토)</a></li>
+        </ul>
+      </div>
+    </div>
+  </section>
+
+  <footer>공모전 #6(상황별 충전량 추천) 기획 참고용으로 정리했습니다. 공식 문서와 실차 데이터는 원문을, 논문은 초록과 공식 요약을 확인했습니다.</footer>
+</div>
+</body>
+</html>
