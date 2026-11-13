@@ -19,7 +19,8 @@ android {
     useLibrary("android.car")
 
     defaultConfig {
-        applicationId = "io.github.univjh.pleosapp"
+        // Separate from the driving coach build so both can stay installed side by side.
+        applicationId = "io.github.univjh.chargeplanner"
         minSdk = 28
         targetSdk = 35
         versionCode = 1

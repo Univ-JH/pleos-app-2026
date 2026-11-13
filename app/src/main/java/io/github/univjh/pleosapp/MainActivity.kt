@@ -1,75 +1,53 @@
 package io.github.univjh.pleosapp
 
+import android.Manifest
+import android.content.Intent
+import android.content.pm.PackageManager
+import android.os.Build
 import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
-import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.widthIn
-import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.Scaffold
-import androidx.compose.material3.Text
-import androidx.compose.runtime.Composable
-import androidx.compose.ui.Alignment
-import androidx.compose.ui.Modifier
-import androidx.compose.ui.res.stringResource
-import androidx.compose.ui.text.style.TextAlign
-import androidx.compose.ui.tooling.preview.Preview
-import androidx.compose.ui.unit.dp
+import androidx.activity.result.contract.ActivityResultContracts
+import androidx.activity.viewModels
+import io.github.univjh.pleosapp.ui.AppRoot
+import io.github.univjh.pleosapp.ui.ChargeViewModel
 import io.github.univjh.pleosapp.ui.theme.PleosAppTheme
 
 class MainActivity : ComponentActivity() {
+    private val app get() = application as ChargeApp
+    private val vm: ChargeViewModel by viewModels()
+    private val permissionRequest = registerForActivityResult(ActivityResultContracts.RequestMultiplePermissions()) {
+        app.energy.refreshPermissions()
+        app.refreshWeather()
+    }
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()
-        setContent {
-            PleosAppTheme {
-                StarterScreen()
-            }
+        setContent { PleosAppTheme { AppRoot(vm) } }
+        requestPermissions()
+        showCardIfAsked(intent)
+    }
+
+    override fun onNewIntent(intent: Intent) { super.onNewIntent(intent); showCardIfAsked(intent) }
+
+    /** The notification posted while the app was hidden leads straight to the card. */
+    private fun showCardIfAsked(intent: Intent) {
+        if (intent.getBooleanExtra(ChargeApp.EXTRA_SHOW_CARD, false)) {
+            intent.removeExtra(ChargeApp.EXTRA_SHOW_CARD)
+            vm.openCard(fromPlugMoment = true)
         }
     }
-}
 
-@Composable
-private fun StarterScreen() {
-    Scaffold(modifier = Modifier.fillMaxSize()) { contentPadding ->
-        Box(
-            modifier = Modifier
-                .fillMaxSize()
-                .padding(contentPadding)
-                .padding(32.dp),
-            contentAlignment = Alignment.Center,
-        ) {
-            Column(
-                modifier = Modifier.widthIn(max = 640.dp),
-                horizontalAlignment = Alignment.CenterHorizontally,
-                verticalArrangement = Arrangement.spacedBy(16.dp),
-            ) {
-                Text(
-                    text = stringResource(R.string.app_name),
-                    style = MaterialTheme.typography.headlineLarge,
-                    textAlign = TextAlign.Center,
-                )
-                Text(
-                    text = stringResource(R.string.starter_message),
-                    style = MaterialTheme.typography.bodyLarge,
-                    color = MaterialTheme.colorScheme.onSurfaceVariant,
-                    textAlign = TextAlign.Center,
-                )
-            }
-        }
+    private fun requestPermissions() {
+        // CAR_ENERGY lets the app read the charge limit back; location is only for the weather forecast.
+        val wanted = mutableListOf("android.car.permission.CAR_ENERGY", Manifest.permission.ACCESS_COARSE_LOCATION)
+        if (Build.VERSION.SDK_INT >= 33) wanted += Manifest.permission.POST_NOTIFICATIONS
+        val missing = wanted.filter { checkSelfPermission(it) != PackageManager.PERMISSION_GRANTED }
+        if (missing.isEmpty()) app.refreshWeather() else permissionRequest.launch(missing.toTypedArray())
     }
-}
 
-@Preview(name = "Automotive", widthDp = 1024, heightDp = 600)
-@Preview(name = "Compact", widthDp = 400, heightDp = 600)
-@Composable
-private fun StarterScreenPreview() {
-    PleosAppTheme {
-        StarterScreen()
-    }
+    override fun onStart() { super.onStart(); app.visible = true; app.energy.start() }
+    override fun onStop() { app.visible = false; super.onStop() }
 }
