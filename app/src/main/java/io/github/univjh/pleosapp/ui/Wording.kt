@@ -1,6 +1,7 @@
 package io.github.univjh.pleosapp.ui
 
 import io.github.univjh.pleosapp.domain.Advice
+import io.github.univjh.pleosapp.domain.EfficiencySource
 import io.github.univjh.pleosapp.domain.ForecastBasis
 import io.github.univjh.pleosapp.domain.PlanKind
 import io.github.univjh.pleosapp.domain.TempBasis
@@ -41,6 +42,16 @@ object Wording {
         a.plan.kind == PlanKind.NEEDS_FULL -> "${dayLabel(a)} 주행에는 80%로 부족해서 100%를 권해요"
         a.plan.kind == PlanKind.UNKNOWN_VEHICLE -> "차량 값을 다 읽지 못해 평소 상한 80%를 권해요"
         else -> "80% 아래로 유지하면 배터리가 덜 늙어요"
+    }
+
+    fun efficiency(a: Advice): String {
+        val e = "%.1f km/kWh".format(a.efficiency.kmPerKwh)
+        return when (a.efficiency.source) {
+            EfficiencySource.CAR_SINCE_CHARGE -> "전비 $e · 차가 기록한 지난 충전 이후 전비"
+            EfficiencySource.CAR_CUMULATIVE -> "전비 $e · 차가 기록한 누적 전비"
+            EfficiencySource.RANGE_ENERGY -> "전비 $e · 차의 남은 주행거리 ÷ 남은 배터리로 계산"
+            EfficiencySource.DEFAULT -> "차가 전비와 남은 주행거리를 알려주지 않아 전비를 ${e}로 가정했어요"
+        }
     }
 
     fun temp(c: Double?) = c?.let { "${it.roundToInt()}°C".replace("-", "−") } ?: "?"

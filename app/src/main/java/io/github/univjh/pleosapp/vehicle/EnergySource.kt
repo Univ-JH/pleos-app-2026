@@ -43,6 +43,9 @@ data class VehicleState(
     /** Charge limit the car reports; null when the app may not read it. */
     val limitPercent: Int? = null,
     val outsideTempC: Double? = null,
+    /** The car's own efficiency records in km/kWh; null when the car does not offer them. */
+    val sinceChargeEfficiency: Double? = null,
+    val cumulativeEfficiency: Double? = null,
 )
 
 sealed interface LimitResult {
@@ -70,6 +73,9 @@ class EnergySource(private val context: Context) {
     private var car: Car? = null
     private var manager: CarPropertyManager? = null
     private var uxManager: CarUxRestrictionsManager? = null
+    /** Set when the car answers that it has no such record, so the slow poll stops asking. */
+    @Volatile private var sinceChargeUnsupported = false
+    @Volatile private var cumulativeUnsupported = false
 
     private val carProps = listOf(
         VehiclePropertyIds.GEAR_SELECTION,
@@ -128,6 +134,8 @@ class EnergySource(private val context: Context) {
     private suspend fun connect() {
         val sdk = Vehicle(context).also { it.initialize() }
         vehicle = sdk
+        sinceChargeUnsupported = false
+        cumulativeUnsupported = false
         delay(1_500) // The SDK binds its service asynchronously and offers no ready callback.
         sdk.getEvBattery().registerEvBatteryStateOfCharge(socListener)
         sdk.getEvBattery().registerEvBatteryLevel(levelListener)
@@ -172,6 +180,15 @@ class EnergySource(private val context: Context) {
         ev.getEvBatteryCapacity({ v -> v?.let { wh -> _state.update { it.copy(capacityKwh = wh / 1000.0) } } }, {})
         sdk.getOdometer().getRangeRemainingDistance({ v -> v?.let { m -> _state.update { it.copy(rangeKm = m / 1000.0) } } }, {})
         sdk.getOdometer().getCurrentDistanceDriven({ v -> v?.let { km -> _state.update { it.copy(odometerKm = km.toDouble()) } } }, {})
+        // The emulator answers both with "not supported" (docs/qa/SPIKE.md); a real car may not.
+        if (!sinceChargeUnsupported) ev.getSinceChargeEvEfficiency(
+            { v -> v?.let { e -> _state.update { it.copy(sinceChargeEfficiency = e.toDouble()) } } },
+            { e -> sinceChargeUnsupported = true; Log.i(TAG, "No efficiency-since-charge record: ${e.message}") },
+        )
+        if (!cumulativeUnsupported) ev.getCumulativeEvEfficiency(
+            { v -> v?.let { e -> _state.update { it.copy(cumulativeEfficiency = e.toDouble()) } } },
+            { e -> cumulativeUnsupported = true; Log.i(TAG, "No cumulative efficiency record: ${e.message}") },
+        )
     }
 
     /**

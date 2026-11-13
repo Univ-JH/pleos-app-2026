@@ -156,11 +156,8 @@ private fun Recommendation(card: CardState, advice: Advice, vehicle: VehicleStat
         Reason(weatherIcon, Wording.weather(advice))
         Reason(Icons.Outlined.BatteryChargingFull, Wording.battery(advice), warn = advice.plan.exceedsFullCharge)
     }
-    if (advice.efficiencyAssumed) {
-        Spacer(Modifier.height(12.dp))
-        Text("차가 남은 주행거리를 알려주지 않아 전비를 ${advice.efficiencyKmPerKwh} km/kWh로 가정했어요",
-            style = MaterialTheme.typography.bodySmall, color = scheme.onSurfaceVariant)
-    }
+    Spacer(Modifier.height(12.dp))
+    Text(Wording.efficiency(advice), style = MaterialTheme.typography.bodySmall, color = scheme.onSurfaceVariant)
 }
 
 @Composable

@@ -67,7 +67,7 @@ class ChargeViewModel(application: Application) : AndroidViewModel(application) 
         val now = LocalDateTime.now()
         val (date, _) = Advisor.drivingDate(now)
         val forecast = w?.takeIf { it.forDate == date.toString() }
-        Advisor.advise(now, soc, capacity, v.rangeKm, v.energyKwh, r, usual, s.reservePercent, m,
+        Advisor.advise(now, soc, capacity, v.rangeKm, v.energyKwh, v.sinceChargeEfficiency, v.cumulativeEfficiency, r, usual, s.reservePercent, m,
             forecast?.minTempC, forecast?.source, v.outsideTempC)
     }.stateIn(viewModelScope, SharingStarted.Eagerly, null)
 
