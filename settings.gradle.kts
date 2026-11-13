@@ -15,7 +15,7 @@ dependencyResolutionManagement {
             name = "PleosPlayground"
             url = uri("https://nexus-playground.pleos.ai/repository/maven-releases/")
             content {
-                includeGroup("ai.pleos.playground")
+                includeGroupByRegex("ai\\.pleos\\.playground.*")
             }
         }
     }

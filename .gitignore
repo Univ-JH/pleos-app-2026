@@ -24,3 +24,7 @@ keystore.properties
 # Generated packages; publish selected submission files explicitly later.
 *.apk
 *.aab
+__pycache__/
+
+# Local QA recordings and exported packages
+artifacts/
